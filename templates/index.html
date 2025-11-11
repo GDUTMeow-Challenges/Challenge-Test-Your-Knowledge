@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>知识问答</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-inner">
+        <h1>知识问答</h1>
+        <p class="subtitle">抽取 50 道题目 · 答题进度实时保存 · 达到 90% 获得 Flag</p>
+      </div>
+    </header>
+
+    <main class="container">
+      <div id="controls" class="controls">
+        <button id="reloadQuestions" class="btn">重新加载题目</button>
+        <button id="submitBtn" class="btn primary">提交答案</button>
+        <div id="status" class="status">正在加载题目…</div>
+      </div>
+
+      <div id="quiz" class="quiz-grid"></div>
+
+      <div id="result" class="result" style="display:none;"></div>
+    </main>
+
+    <footer class="footer">© 知识问答</footer>
+
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>
