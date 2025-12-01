@@ -9,8 +9,9 @@ function el(tag, cls, attrs) {
   return e;
 }
 
-async function fetchQuestions() {
-  const res = await fetch('/api/questions');
+async function fetchQuestions(forceNew=false) {
+  const url = '/api/questions';
+  const res = await fetch(url);
   const data = await res.json();
   SESSION = data.session;
   QUESTIONS = data.questions || [];
@@ -78,24 +79,35 @@ async function submit() {
   const data = await res.json();
   const result = document.getElementById('result');
   result.style.display = 'block';
-  result.innerHTML = `<h3>得分: ${data.score}%</h3>`;
+  // show as xx/100
+  result.innerHTML = `<h3>得分: ${data.score}/100</h3>`;
+  // scroll to top so header/result are visible
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0,0); }
   if (data.flag) {
-    const f = el('pre'); f.textContent = data.flag; f.style.background='#111'; f.style.color='#fff'; f.style.padding='8px'; f.style.borderRadius='8px';
+    const hint = el('p'); hint.textContent = '恭喜你获得了 flag！'; 
+    result.appendChild(hint);
+    const f = el('pre'); 
+    f.textContent = data.flag;
     result.appendChild(f);
   } else {
-    const hint = el('p'); hint.textContent = '未达到 90% ，无法获得 Flag。请重答或复习题目。'; result.appendChild(hint);
+    const hint = el('p'); hint.textContent = '你还未达到 90 分哦，去检查一下吧！'; result.appendChild(hint);
   }
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('reloadQuestions').addEventListener('click', ()=>{
-    // clear cookie by reloading from server: force new by removing local session cookie via requesting /api/questions after clearing localStorage for this session
-    // clear local storage for current session (if any)
-    if (SESSION) localStorage.removeItem(storageKey());
-    fetchQuestions();
+    // show modal instructing user to destroy and relaunch container
+    const modal = document.getElementById('destroyModal');
+    if (modal) modal.style.display = 'flex';
   });
   document.getElementById('submitBtn').addEventListener('click', ()=>{
     submit();
+  });
+  // modal close handler
+  const modalClose = document.getElementById('modalClose');
+  if (modalClose) modalClose.addEventListener('click', ()=>{
+    const modal = document.getElementById('destroyModal');
+    if (modal) modal.style.display = 'none';
   });
   fetchQuestions();
 });

@@ -39,9 +39,11 @@ def load_all_questions() -> List[Dict[str, Any]]:
 			try:
 				qid = r.get("序号") or r.get("id")
 				question = r.get("题目内容") or r.get("question") or ""
-				opts = [r.get("选项A", ""), r.get("选项B", ""), r.get("选项C", ""), r.get("选项D", "")]
+				opts = [r.get("选项A", ""), r.get("选项B", ""),
+				              r.get("选项C", ""), r.get("选项D", "")]
 				answer_letter = (r.get("正确答案") or r.get("answer") or "").strip()
-				rows.append({"id": str(qid), "question": question, "options": opts, "answer_letter": answer_letter})
+				rows.append({"id": str(qid), "question": question,
+				            "options": opts, "answer_letter": answer_letter})
 			except Exception:
 				continue
 	return rows
@@ -71,27 +73,42 @@ def prepare_session_questions(all_qs: List[Dict[str, Any]]) -> List[Dict[str, An
 				if orig_i == orig_correct_idx:
 					correct_index = new_i
 					break
-		out.append({"id": q["id"], "question": q["question"], "options": shuffled_opts, "_correct_index": correct_index})
+		out.append({"id": q["id"], "question": q["question"],
+		           "options": shuffled_opts, "_correct_index": correct_index})
 	return out
 
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-	return templates.TemplateResponse("index.html", {"request": request})
+	# On first access after container start, clear any existing session_id cookie
+	# to avoid leftover invalid session ids from previous runs.
+	marker = os.path.join(os.path.dirname(__file__), ".first_visit_done")
+	first_visit = not os.path.exists(marker)
+	if first_visit:
+		# create marker file so this runs only once per container lifetime
+		try:
+			with open(marker, "w", encoding="utf-8") as f:
+				f.write("visited")
+		except Exception:
+			pass
+
+	response = templates.TemplateResponse("index.html", {"request": request, "first_visit": first_visit})
+	if first_visit:
+		# delete session_id cookie on client
+		response.delete_cookie("session_id")
+	return response
 
 
 @app.get("/api/questions")
 async def get_questions(request: Request):
-	# check cookie for session id
+	# simple session behavior: if client has session_id and server knows it, reuse; otherwise create one
 	session_id = request.cookies.get("session_id")
 	if session_id and session_id in app.state.sessions:
 		session = app.state.sessions[session_id]
 	else:
-		# create new session
 		all_qs = load_all_questions()
 		prepared = prepare_session_questions(all_qs)
 		session_id = str(uuid.uuid4())
-		# store only necessary server-side info (including correct index)
 		app.state.sessions[session_id] = {"questions": prepared}
 		session = app.state.sessions[session_id]
 
@@ -135,6 +152,8 @@ async def submit_answers(payload: Dict = Body(...)):
 		flag = os.environ.get("A1CTF_FLAG")
 		if flag:
 			result["flag"] = flag
+		else:
+			result["flag"] = "flag{INVALID_FLAG_CONTACT_ADMIN}"
 	return JSONResponse(result)
 
 

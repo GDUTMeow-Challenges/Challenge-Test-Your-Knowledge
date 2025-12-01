@@ -1,34 +1,47 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
+
+<head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>知识问答</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
-  </head>
-  <body>
+</head>
+
+<body>
     <header class="app-header">
-      <div class="header-inner">
-        <h1>知识问答</h1>
-        <p class="subtitle">抽取 50 道题目 · 答题进度实时保存 · 达到 90% 获得 Flag</p>
-      </div>
+        <div class="header-inner">
+            <div class="header-left">
+                <h1>知识问答</h1>
+                <p class="subtitle">答题进度实时保存 · 达到 90 分即可获得 flag</p>
+            </div>
+            <div class="header-actions">
+                <div id="status" class="status">正在加载题目…</div>
+                <button id="reloadQuestions" class="btn">换一批题目</button>
+                <button id="submitBtn" class="btn primary">提交答案</button>
+            </div>
+        </div>
     </header>
 
     <main class="container">
-      <div id="controls" class="controls">
-        <button id="reloadQuestions" class="btn">重新加载题目</button>
-        <button id="submitBtn" class="btn primary">提交答案</button>
-        <div id="status" class="status">正在加载题目…</div>
-      </div>
-
-      <div id="quiz" class="quiz-grid"></div>
-
-      <div id="result" class="result" style="display:none;"></div>
+        <div id="result" class="result" style="display:none; margin-top:18px; margin-bottom: 18px;"></div>
+        <div id="quiz" class="quiz-grid"></div>
     </main>
 
-    <footer class="footer">© 知识问答</footer>
+        <!-- Modal dialog for instructing user to destroy & relaunch container -->
+        <div id="destroyModal" class="modal" style="display:none;">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <h3>换一批题目</h3>
+                <p>要换一批题目，请去平台上点击「Destroy」销毁当前容器后，再点击「Launch」重开容器。</p>
+                <div class="modal-actions">
+                    <button id="modalClose" class="btn primary">我知道了</button>
+                </div>
+            </div>
+        </div>
 
     <script src="/static/js/app.js"></script>
-  </body>
+</body>
+
 </html>
